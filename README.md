@@ -88,7 +88,23 @@ Next Token Prediction
 The model predicts the probability distribution over the vocabulary and selects the most probable next token.
 
 ---
+---
 
+# Model Configuration
+
+| Parameter | Value |
+|---|---|
+| Architecture | Decoder-only Transformer |
+| Embedding Dimension | 256 |
+| Transformer Layers | 4 |
+| Attention Heads | 4 |
+| Sequence Length | 64 |
+| Dropout | 0.1 |
+| Optimizer | AdamW |
+| Learning Rate | 3e-4 |
+| Loss Function | Cross Entropy Loss |
+
+---
 # Dataset
 
 ## WikiText-2 Dataset
@@ -101,6 +117,8 @@ Dataset characteristics:
 * Task: Next token prediction
 * Vocabulary size: ~66K tokens
 * Context length: 64 tokens
+* Training samples used: 250,000
+* Train-validation split: 90/10
 
 ---
 
@@ -317,23 +335,43 @@ the united states is one of the largest economies...
 
 # Engineering Highlights
 
-* Implemented Transformer architecture from scratch using PyTorch
-* Built custom tokenization and preprocessing pipeline
-* Developed complete training and inference workflow
-* Integrated trained deep learning model with API backend
-* Created interactive UI for real-time predictions
+* Implemented GPT-style Transformer architecture from scratch using PyTorch
+* Developed multi-head self-attention with causal masking
+* Built custom NLP preprocessing, tokenization, and vocabulary pipeline
+* Designed complete training and inference workflow
+* Added validation-based model selection and checkpoint management
+* Applied optimization techniques including gradient clipping and learning rate scheduling
+* Integrated trained deep learning model with FastAPI backend
+* Created interactive Streamlit interface for real-time predictions
 
 ---
 
+# Results
+
+The model successfully learns language patterns and generates context-aware next-word predictions.
+
+Training details:
+
+| Metric | Value |
+|---|---|
+| Training Samples | 250,000 |
+| Epochs | 10 |
+| Validation Split | 10% |
+| Best Validation Loss | Add after training |
+
+The model performance is monitored using validation loss, and only the best performing checkpoint is saved for inference.
+
+---
 # Future Improvements
 
+* Implement subword tokenization using BPE/SentencePiece
+* Reduce vocabulary size using frequency-based vocabulary filtering
 * Train on larger datasets
 * Implement Byte Pair Encoding (BPE) tokenizer
 * Add beam search decoding
 * Improve text generation quality using larger models
 * Deploy model using cloud infrastructure
 * Add model evaluation metrics
-
 ---
 
 # Author
