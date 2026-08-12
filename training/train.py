@@ -9,9 +9,6 @@ import math
 
 print("Current Working Directory:", os.getcwd())
 
-# =====================================
-# Dataset
-# =====================================
 MAX_EXAMPLES = 100000
 full_dataset = NextWordDataset(
     padded_inputs[:MAX_EXAMPLES],
@@ -27,9 +24,6 @@ val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, drop_last=Fal
 
 print(f"Train samples: {train_size} | Val samples: {val_size}")
 
-# =====================================
-# Device
-# =====================================
 device = torch.device(
     "mps" if torch.backends.mps.is_available()
     else "cuda" if torch.cuda.is_available()
@@ -37,11 +31,9 @@ device = torch.device(
 )
 print("Using device:", device)
 
-# =====================================
-# Model
-# =====================================
 vocab_size = len(word2idx)
 print("Vocabulary:", vocab_size)
+
 model = GPT(
     vocab_size=vocab_size,
     embed_dim=256,
@@ -53,11 +45,8 @@ model = GPT(
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.01)
 
-# =====================================
-# Training + Validation
-# =====================================
-epochs = 5
 best_val_loss = float("inf")
+epochs = 5
 
 for epoch in range(epochs):
     model.train()
@@ -95,7 +84,6 @@ for epoch in range(epochs):
         "val_loss": avg_val_loss
     }
     torch.save(checkpoint, f"model_epoch_{epoch+1}.pth")
-    torch.save(checkpoint, "model.pth")
 
     if avg_val_loss < best_val_loss:
         best_val_loss = avg_val_loss
