@@ -348,18 +348,23 @@ the united states is one of the largest economies...
 
 # Results
 
-The model successfully learns language patterns and generates context-aware next-word predictions.
+The model successfully learns language patterns and generates context-aware
+next-word predictions.
 
-Training details:
+Training and evaluation details:
 
 | Metric | Value |
-|---|---|
-| Training Samples | 250,000 |
+| --------------------- | ---------------- |
+| Training Samples | **250,000+** |
+| Vocabulary Size | **66K+ tokens** |
 | Epochs | 10 |
 | Validation Split | 10% |
-| Best Validation Loss | Add after training |
+| Validation Loss | **5.55** |
+| Perplexity | **257** |
+| Top-3 Accuracy | **33%** |
 
-The model performance is monitored using validation loss, and only the best performing checkpoint is saved for inference.
+The model performance is monitored using validation loss, perplexity, and
+Top-3 accuracy, with the best performing checkpoint saved for inference.
 
 ---
 # Future Improvements
