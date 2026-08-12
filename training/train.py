@@ -5,14 +5,19 @@ from utils.dataset import NextWordDataset
 from utils.tokenizer import word2idx
 from models.transformer import GPT
 import os
+import math
 
+print("Current Working Directory:", os.getcwd())
+
+# =====================================
+# Dataset
+# =====================================
 MAX_EXAMPLES = 100000
 full_dataset = NextWordDataset(
     padded_inputs[:MAX_EXAMPLES],
     targets[:MAX_EXAMPLES]
 )
 
-# ===== Train/Val split (90/10, matches your README claim) =====
 val_size = int(0.1 * len(full_dataset))
 train_size = len(full_dataset) - val_size
 train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
@@ -22,10 +27,37 @@ val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, drop_last=Fal
 
 print(f"Train samples: {train_size} | Val samples: {val_size}")
 
-# ... (device, model, criterion, optimizer setup stays the same) ...
+# =====================================
+# Device
+# =====================================
+device = torch.device(
+    "mps" if torch.backends.mps.is_available()
+    else "cuda" if torch.cuda.is_available()
+    else "cpu"
+)
+print("Using device:", device)
 
-best_val_loss = float("inf")
+# =====================================
+# Model
+# =====================================
+vocab_size = len(word2idx)
+print("Vocabulary:", vocab_size)
+model = GPT(
+    vocab_size=vocab_size,
+    embed_dim=256,
+    num_heads=4,
+    num_layers=4,
+    max_length=64
+).to(device)
+
+criterion = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.01)
+
+# =====================================
+# Training + Validation
+# =====================================
 epochs = 5
+best_val_loss = float("inf")
 
 for epoch in range(epochs):
     model.train()
@@ -44,7 +76,6 @@ for epoch in range(epochs):
 
     avg_train_loss = total_loss / len(train_loader)
 
-    # ===== Validation loop (no gradients, no weight updates) =====
     model.eval()
     val_loss = 0.0
     with torch.no_grad():
@@ -55,18 +86,21 @@ for epoch in range(epochs):
             val_loss += loss.item()
     avg_val_loss = val_loss / len(val_loader)
 
-    print(f"\nEpoch {epoch+1}/{epochs} | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
+    print(f"\nEpoch {epoch+1}/{epochs} | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}\n")
 
-    # Save best checkpoint based on val loss, not just every epoch
+    checkpoint = {
+        "model_state_dict": model.state_dict(),
+        "vocab_size": vocab_size,
+        "embed_dim": 256, "num_heads": 4, "num_layers": 4, "max_length": 64,
+        "val_loss": avg_val_loss
+    }
+    torch.save(checkpoint, f"model_epoch_{epoch+1}.pth")
+    torch.save(checkpoint, "model.pth")
+
     if avg_val_loss < best_val_loss:
         best_val_loss = avg_val_loss
-        checkpoint = {
-            "model_state_dict": model.state_dict(),
-            "vocab_size": vocab_size,
-            "embed_dim": 256, "num_heads": 4, "num_layers": 4, "max_length": 64,
-            "val_loss": avg_val_loss
-        }
         torch.save(checkpoint, "best_model.pth")
-        print(f"New best model saved (val loss: {avg_val_loss:.4f})")
 
-print(f"\nTraining completed! Best Validation Loss: {best_val_loss:.4f}")
+perplexity = math.exp(best_val_loss)
+print(f"Training completed! Best Validation Loss: {best_val_loss:.4f}")
+print(f"Validation Perplexity: {perplexity:.2f}")
